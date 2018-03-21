@@ -198,8 +198,12 @@ describe('ukBankHolidays', () => {
             await ukBankHolidays('24-12-2018').should.be.rejectedWith('Countries not passed');
         });
 
-        it('should throw an error invalid country passed', async function() {
+        it('should throw an error if invalid country passed', async function() {
             await ukBankHolidays('24-12-2018', ['invalidCountry']).should.be.rejectedWith('Country not on the list');
+        });
+
+        it('should throw an error if countries is not an array', async function() {
+            await ukBankHolidays('24-12-2018', 'england-and-wales').should.be.rejectedWith('Countries must be an array');
         });
 
     });

@@ -11,6 +11,10 @@ const isDateABankHoliday = async function(date, countries) {
         throw new Error('Countries not passed');
     }
 
+    if (!Array.isArray(countries)) {
+        throw new Error('Countries must be an array');
+    }
+
     if (!validCountry(countries)) {
         throw new Error('Country not on the list');
     }
