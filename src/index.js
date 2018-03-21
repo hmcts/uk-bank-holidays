@@ -1,4 +1,4 @@
-const { formatDate, isDateInList, bankHolidayList, validCountry } = require('src/utils');
+const { formatDate, isDateInList, bankHolidayList, validCountry } = require('./utils');
 const request = require('superagent');
 
 const isDateABankHoliday = async function(date, countries) {

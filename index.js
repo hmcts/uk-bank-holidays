@@ -1,3 +1,3 @@
-const ukBankHolidays = require('src');
+const ukBankHolidays = require('./src');
 
 module.exports = ukBankHolidays;
