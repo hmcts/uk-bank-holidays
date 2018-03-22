@@ -17,25 +17,15 @@ const isDateInList = (dateList, date) => {
 };
 
 const bankHolidayList = (dates, countries) => {
-    let dateList = [];
 
-    countries.forEach(country => {
-        const countryDates = dates[country].events.map(event => event.date);
-        dateList.push(countryDates);
-    });
+    const dateList = countries.map(country => dates[country].events.map(event => event.date));
 
     return flatten(dateList);
 };
 
 const validCountry = countries => {
-
-    let valid = true;
-
-    valid = countries.every(country => {
-       return includes(ukCountries, country);
-    });
-
-    return valid;
+    
+    return countries.every(country => includes(ukCountries, country));
 };
 
 const isStringDateCorrectFormat = date => {

@@ -51,6 +51,11 @@ describe('utils', () => {
                         date: '2018-12-26'
                     }]
                 },
+                'northern-ireland': {
+                    events: [{
+                        date: '2018-10-02'
+                    }]
+                },
                 scotland: {
                     events: [{
                         date: '2018-11-30'
@@ -69,6 +74,11 @@ describe('utils', () => {
             expect(list).to.eql(['2018-12-25', '2018-12-26', '2018-11-30']);
         });
 
+        it('should return an array of dates from the array of all countries passed', () => {
+            const list = bankHolidayList(dates, ['england-and-wales', 'northern-ireland', 'scotland']);
+            expect(list).to.eql(['2018-12-25', '2018-12-26', '2018-10-02', '2018-11-30']);
+        });
+
     });
 
     describe('validCountry', () => {
@@ -78,8 +88,18 @@ describe('utils', () => {
             expect(valid).to.equal(true);
         });
 
+        it('a', () => {
+            const valid = validCountry(['england-and-wales', 'scotland']);
+            expect(valid).to.equal(true);
+        });
+
         it('should return false if country is not a valid UK country', () => {
             const valid = validCountry(['Brazil']);
+            expect(valid).to.equal(false);
+        });
+
+        it('b', () => {
+            const valid = validCountry(['scotland', 'Brazil']);
             expect(valid).to.equal(false);
         });
 
