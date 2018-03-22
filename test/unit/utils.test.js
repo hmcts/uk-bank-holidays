@@ -1,5 +1,5 @@
 const { expect } = require('test/chai');
-const { formatDate, isDateInList, bankHolidayList, validCountry } = require('src/utils');
+const { formatDate, isDateInList, bankHolidayList, validCountry, isStringDateCorrectFormat, isDateValid } = require('src/utils');
 const moment = require('moment');
 
 describe('utils', () => {
@@ -80,6 +80,54 @@ describe('utils', () => {
 
         it('should return false if country is not a valid UK country', () => {
             const valid = validCountry(['Brazil']);
+            expect(valid).to.equal(false);
+        });
+
+    });
+
+    describe('isStringDateCorrectFormat', () => {
+
+        it('should return null if date is empty string', () => {
+            const valid = isStringDateCorrectFormat('');
+            expect(valid).to.be.null;
+        });
+
+        it('should return null if date is an incorrect format', () => {
+            const valid = isStringDateCorrectFormat('2-6-18');
+            expect(valid).to.be.null;
+        });
+
+        it('should return null if date has / instead of -', () => {
+            const valid = isStringDateCorrectFormat('02/06/2018');
+            expect(valid).to.be.null;
+        });
+
+        it('should match date regex if correct formatted date', () => {
+            const valid = isStringDateCorrectFormat('02-06-2018');
+            expect(valid).to.not.be.null;
+        });
+
+    });
+
+    describe('isDateValid', () => {
+
+        it('should return true if a valid string date is passed', () => {
+            const valid = isDateValid('25-12-2018');
+            expect(valid).to.equal(true);
+        });
+
+        it('should return true if a valid moment date is passed', () => {
+            const valid = isDateValid(moment());
+            expect(valid).to.equal(true);
+        });
+
+        it('should return false if an invalid string date is passed', () => {
+            const valid = isDateValid('30-02-2018');
+            expect(valid).to.equal(false);
+        });
+
+        it('should return false if an invalid moment date is passed', () => {
+            const valid = isDateValid(moment('30-02-2018', 'DD-MM-YYYY'));
             expect(valid).to.equal(false);
         });
 
