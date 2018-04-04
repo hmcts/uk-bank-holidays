@@ -69,11 +69,11 @@ class UKBankHolidays {
     }
 
     get bankHolidayDates() {
-        return myCache.get('meow');
+        return myCache.get('bankHolidayDates');
     }
 
     set bankHolidayDates(bankHolidayDates) {
-        myCache.set('meow', bankHolidayDates);
+        myCache.set('bankHolidayDates', bankHolidayDates);
     }
 }
 
