@@ -24,7 +24,6 @@ const bankHolidayList = (dates, countries) => {
 };
 
 const validCountry = countries => {
-    
     return countries.every(country => includes(ukCountries, country));
 };
 
