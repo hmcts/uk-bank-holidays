@@ -8,8 +8,9 @@ const {
 } = require('./utils');
 const request = require('superagent');
 const NodeCache = require( "node-cache" );
+const oneWeek = 604800;
 const myCache = new NodeCache({
-    stdTTL: 60
+    stdTTL: process.env.UK_BANK_HOLIDAYS_CACHE_AGE || oneWeek
 });
 
 class UKBankHolidays {
@@ -31,17 +32,17 @@ class UKBankHolidays {
         this.countries = countries;
     }
 
-    async loadBankHolidayDates() {
+    async loadBankHolidayDates(errorCallback) {
+
         if(this.bankHolidayDates) {
-            console.log('dates')
-            Promise.resolve();
+            return this.bankHolidayDates;
         } else {
-            console.log('no dates')
             try {
                 const bankHolidays = await request.get('https://www.gov.uk/bank-holidays.json');
                 this.bankHolidayDates = bankHolidayList(bankHolidays.body, this.countries);
-            } catch (err) {
-                throw new Error(err);
+                return this.bankHolidayDates;
+            } catch (error) {
+                errorCallback(error);
             }
 
         }
