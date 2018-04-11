@@ -89,7 +89,7 @@ describe('ukBankHolidays', () => {
 
     });
 
-    describe('isDateInList', () => {
+    describe('isDateABankHoliday', () => {
 
         let isDateInList;
 
@@ -99,37 +99,37 @@ describe('ukBankHolidays', () => {
         });
 
         it('should return true if date is a string and in the list', () => {
-            isDateInList = ukBankHolidays.isDateInList('25-12-2018');
+            isDateInList = ukBankHolidays.isDateABankHoliday('25-12-2018');
             expect(isDateInList).to.equal(true);
         });
 
         it('should return false if date is a string but not in the list', () => {
-            isDateInList = ukBankHolidays.isDateInList('31-08-2018');
+            isDateInList = ukBankHolidays.isDateABankHoliday('31-08-2018');
             expect(isDateInList).to.equal(false);
         });
 
         it('should return true if date is a moment and in the list', () => {
-            isDateInList = ukBankHolidays.isDateInList(moment('25-12-2018', 'DD-MM-YYYY'));
+            isDateInList = ukBankHolidays.isDateABankHoliday(moment('25-12-2018', 'DD-MM-YYYY'));
             expect(isDateInList).to.equal(true);
         });
 
         it('should return false if date is a moment but not in the list', () => {
-            isDateInList = ukBankHolidays.isDateInList(moment('31-08-2018', 'DD-MM-YYYY'));
+            isDateInList = ukBankHolidays.isDateABankHoliday(moment('31-08-2018', 'DD-MM-YYYY'));
             expect(isDateInList).to.equal(false);
         });
 
         it('should throw an error if date is not correct format', () => {
-            isDateInList = () => ukBankHolidays.isDateInList('2018-12-25');
+            isDateInList = () => ukBankHolidays.isDateABankHoliday('2018-12-25');
             expect(isDateInList).to.throw(Error, 'Date is an incorrect format. Must be in DD-MM-YYYY format');
         });
 
         it('should throw an error if date is an empty string', () => {
-            isDateInList = () => ukBankHolidays.isDateInList('');
+            isDateInList = () => ukBankHolidays.isDateABankHoliday('');
             expect(isDateInList).to.throw(Error, 'Date is an incorrect format. Must be in DD-MM-YYYY format');
         });
 
         it('should throw an error if date is not valid', () => {
-            isDateInList = () => ukBankHolidays.isDateInList('30-02-2018');
+            isDateInList = () => ukBankHolidays.isDateABankHoliday('30-02-2018');
             expect(isDateInList).to.throw(Error, 'Date passed is an invalid date');
         });
 

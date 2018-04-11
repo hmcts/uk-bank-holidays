@@ -48,7 +48,7 @@ class UKBankHolidays {
         }
     }
 
-    isDateInList(date) {
+    isDateABankHoliday(date) {
 
         if (typeof date === 'string' && !isStringDateCorrectFormat(date)) {
             throw new Error('Date is an incorrect format. Must be in DD-MM-YYYY format');
