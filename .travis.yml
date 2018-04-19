@@ -4,7 +4,10 @@ node_js:
   - "8.1.4"
 
 install:
+  - yarn global add codecov
   - yarn install
 
 script:
   - yarn test
+  - yarn coverage
+  - codecov
