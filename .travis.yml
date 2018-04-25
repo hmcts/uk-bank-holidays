@@ -1,13 +1,19 @@
 language: node_js
-
 node_js:
-  - "8.1.4"
-
+  - 8.1.4
 install:
   - yarn global add codecov
   - yarn install
-
 script:
   - yarn test
   - yarn coverage
   - codecov
+
+deploy:
+  provider: npm
+  email: ben.diggle5@gmail.com
+  api_key:
+    secure: RWx2LM9vrSKRDKjWiNzY1abkpiM7QO0K8HBqlx/LCS1kCC6s7wAXUSrmdEfcKhjDO+pvrYIbiOn+lMl9yMyvnqruIB/0HvWVZpKEOBpYuZHSKdCYZ+BTNccUsRuE4+FUp+NuL56dwm3rooE7z5eylbwRSS5qwM7zLY1GUr35JEPEhx+0p5H5YA9q8iA2zSafIHSFvGV5OGc1TAMUujWNSocQeyjD7iRj9CIop0i5EOkUZRwlI4vcrsBKd6ED32FAD+jnh0LzbzEEsafef+JQiR3+S8IuOBaG6smGAWj2rBsu2QZvn7VPSA5PdtZ8I5PUPs4RlnngFcLuhP0dh5Dli2l+ewFquZ9ZAjvzGZx+GvL21qX+wwXJsgOfCCAVFwVnFlegMHICA/7Wmh73WO40JGqIpR8werNKWLr9LJJsGDgN0QNxS26o0ZsdhNPctErtiRQciFExoOd6c+Qo5AGshuBS8GaFCv6lQnbOXx+FcOUp0WhDi2azPSoYr8KgT0HdYX+DklxUR9F7Xn1b0+Et6leA0AAfVEFa48KuTnUx7AhpXUVM0UWbF61KITdy8L3kveq37MU4TjNGiwz4gJcKnvzREKdzuiNlzsD7j97u1chCckyuNiYDRcuEBGfCwuxPK7+IQVjTjKDLkupG6Ij6KX+yxqtszQbMauwPzsuEhfQ=
+  on:
+    tags: true
+    repo: hmcts/uk-bank-holidays
