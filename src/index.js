@@ -1,42 +1,81 @@
-const { formatDate, isDateInList, bankHolidayList, validCountry, isStringDateCorrectFormat, isDateValid } = require('./utils');
+const {
+    formatDate,
+    isDateInList,
+    bankHolidayList,
+    validCountry,
+    isStringDateCorrectFormat,
+    isDateValid
+} = require('./utils');
 const request = require('superagent');
+const NodeCache = require( "node-cache" );
+const oneWeek = 604800;
+const myCache = new NodeCache({
+    stdTTL: process.env.UK_BANK_HOLIDAYS_CACHE_AGE || oneWeek
+});
 
-const isDateABankHoliday = async function(date, countries) {
+class UKBankHolidays {
 
-    if (!date && !countries) {
-        throw new Error('No arguments passed');
+    constructor(countries) {
+
+        if (!countries) {
+            throw new Error('Countries not passed');
+        }
+
+        if (!Array.isArray(countries)) {
+            throw new Error('Countries must be an array');
+        }
+
+        if (!validCountry(countries)) {
+            throw new Error('Country not on the list');
+        }
+
+        this.countries = countries;
     }
 
-    if (typeof date === 'string' && !isStringDateCorrectFormat(date)) {
-        throw new Error('Date is an incorrect format. Must be in DD-MM-YYYY format');
+    async loadBankHolidayDates(errorCallback) {
+
+        if(this.bankHolidayDates) {
+            return this.bankHolidayDates;
+        } else {
+            try {
+                const bankHolidays = await request.get('https://www.gov.uk/bank-holidays.json');
+                this.bankHolidayDates = bankHolidayList(bankHolidays.body, this.countries);
+                return this.bankHolidayDates;
+            } catch (error) {
+                errorCallback(error);
+            }
+
+        }
     }
 
-    if (!isDateValid(date)) {
-        throw new Error('Date passed is an invalid date');
+    isDateABankHoliday(date) {
+
+        if (typeof date === 'string' && !isStringDateCorrectFormat(date)) {
+            throw new Error('Date is an incorrect format. Must be in DD-MM-YYYY format');
+        }
+
+        if (!isDateValid(date)) {
+            throw new Error('Date passed is an invalid date');
+        }
+
+        return isDateInList(this.bankHolidayDates, formatDate(date));
     }
 
-    if (!countries) {
-        throw new Error('Countries not passed');
+    get countries() {
+        return this._countries;
     }
 
-    if (!Array.isArray(countries)) {
-        throw new Error('Countries must be an array');
+    set countries(countries) {
+        this._countries = countries
     }
 
-    if (!validCountry(countries)) {
-        throw new Error('Country not on the list');
+    get bankHolidayDates() {
+        return myCache.get('bankHolidayDates');
     }
 
-    date = formatDate(date);
-
-    try {
-        const bankHolidays = await request.get('https://www.gov.uk/bank-holidays.json');
-        const bankHolidayDates = bankHolidayList(bankHolidays.body, countries);
-        return isDateInList(bankHolidayDates, date);
-    } catch (err) {
-        throw new Error(err);
+    set bankHolidayDates(bankHolidayDates) {
+        myCache.set('bankHolidayDates', bankHolidayDates);
     }
+}
 
-};
-
-module.exports = isDateABankHoliday;
+module.exports = UKBankHolidays;

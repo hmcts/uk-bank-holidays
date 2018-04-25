@@ -1,235 +1,136 @@
 const { expect } = require('test/chai');
-const ukBankHolidays = require('src');
+const UkBankHolidays = require('src');
 const moment = require('moment');
+const nock = require('nock');
 
 describe('ukBankHolidays', () => {
 
     let countries;
+    let ukBankHolidays;
+    let apiResponse = {};
 
-    describe('england-and-wales', () => {
+    countries = {
+        eaw: 'england-and-wales',
+        ni: 'northern-ireland',
+        sct: 'scotland'
+    };
 
-        before(() => {
-           countries =  ['england-and-wales'];
+    apiResponse[countries.eaw] = {
+        events: [{
+            date: '2018-12-25'
+        }]
+    };
+    apiResponse[countries.sct] = {
+        events: [{
+            date: '2018-01-01'
+        }]
+    };
+
+    describe('constructor', () => {
+
+        it('should throw an error if countries not passed', () => {
+            ukBankHolidays = () => new UkBankHolidays();
+            expect(ukBankHolidays).to.throw(Error, 'Countries not passed');
         });
 
-        it('returns true when date is on a bank holiday', async function() {
-            const isBankHoliday = await ukBankHolidays('25-12-2018', countries);
-            expect(isBankHoliday).to.equal(true);
+        it('should throw an error if countries is not an array', () => {
+            ukBankHolidays = () => new UkBankHolidays(countries.eaw);
+            expect(ukBankHolidays).to.throw(Error, 'Countries must be an array');
         });
 
-        it('returns false when date is not on a bank holiday', async function() {
-            const isBankHoliday = await ukBankHolidays('21-03-2018', countries);
-            expect(isBankHoliday).to.equal(false);
+        it('should throw an error if invalid country passed', () => {
+            ukBankHolidays = () => new UkBankHolidays(['invalidCountry']);
+            expect(ukBankHolidays).to.throw(Error, 'Country not on the list');
         });
 
-    });
-
-    describe('scotland', () => {
-
-        before(() => {
-            countries =  ['scotland'];
-        });
-
-        it('returns true when date is on a bank holiday', async function() {
-            const isBankHoliday = await ukBankHolidays('30-11-2018', countries);
-            expect(isBankHoliday).to.equal(true);
-        });
-
-        it('returns false when date is not on a bank holiday', async function() {
-            const isBankHoliday = await ukBankHolidays('21-03-2018', countries);
-            expect(isBankHoliday).to.equal(false);
-        });
-
-    });
-
-    describe('northern-ireland', () => {
-
-        before(() => {
-            countries =  ['northern-ireland'];
-        });
-
-        it('returns true when date is on a bank holiday', async function() {
-            const isBankHoliday = await ukBankHolidays('12-07-2018', countries);
-            expect(isBankHoliday).to.equal(true);
-        });
-
-        it('returns false when date is not on a bank holiday', async function() {
-            const isBankHoliday = await ukBankHolidays('21-03-2018', countries);
-            expect(isBankHoliday).to.equal(false);
+        it('should set countries', () => {
+            ukBankHolidays = new UkBankHolidays([countries.sct]);
+            expect(ukBankHolidays.countries).to.eql([countries.sct]);
         });
 
     });
 
-    describe('england-and-wales and scotland', () => {
+    describe('loadBankHolidayDates', () => {
+
+        let api;
+        let bankHolidayDates;
+        let loadDates;
 
         before(() => {
-            countries =  ['england-and-wales', 'scotland'];
+            ukBankHolidays = new UkBankHolidays([countries.eaw]);
+            bankHolidayDates = ['2018-12-25'];
         });
 
-        it('returns true when date is a scottish bank holiday but not english or welsh', async function() {
-            const isBankHoliday = await ukBankHolidays('30-11-2018', countries);
-            expect(isBankHoliday).to.equal(true);
+        it('rejects the promise an error is caught when sending a request to the api', async () => {
+            const error = { value: 500, reasons: 'server error', response: undefined };
+            api = nock('https://www.gov.uk')
+                .get('/bank-holidays.json')
+                .replyWithError(error);
+
+            await ukBankHolidays.loadBankHolidayDates(error => {
+                expect(error).to.eql(error)
+            });
         });
 
-        it('returns true when date is an english and welsh bank holiday but scottish', async function() {
-            const isBankHoliday = await ukBankHolidays('27-08-2018', countries);
-            expect(isBankHoliday).to.equal(true);
+        it('resolves the promise if bankHolidayDates hasn\'t been set but request was successful', async () => {
+            api = nock('https://www.gov.uk')
+                .get('/bank-holidays.json')
+                .reply(200, apiResponse);
+
+            loadDates = await ukBankHolidays.loadBankHolidayDates();
+            expect(loadDates).to.eql(bankHolidayDates)
         });
 
-        it('returns false when date is not a scottish, english or welsh bank holiday', async function() {
-            const isBankHoliday = await ukBankHolidays('21-03-2018', countries);
-            expect(isBankHoliday).to.equal(false);
+        it('resolves the promise if bankHolidayDates has already been set', async () => {
+            ukBankHolidays.bankHolidayDates = bankHolidayDates;
+            loadDates = await ukBankHolidays.loadBankHolidayDates();
+            expect(loadDates).to.eql(bankHolidayDates)
         });
 
     });
 
-    describe('england-and-wales and northern-ireland', () => {
+    describe('isDateABankHoliday', () => {
+
+        let isDateInList;
 
         before(() => {
-            countries =  ['england-and-wales', 'northern-ireland'];
+            ukBankHolidays = new UkBankHolidays([countries.eaw]);
+            ukBankHolidays.bankHolidayDates = ['2018-12-25'];
         });
 
-        it('returns true when date is a northern-irish bank holiday but not english or welsh', async function() {
-            const isBankHoliday = await ukBankHolidays('12-07-2018', countries);
-            expect(isBankHoliday).to.equal(true);
+        it('should return true if date is a string and in the list', () => {
+            isDateInList = ukBankHolidays.isDateABankHoliday('25-12-2018');
+            expect(isDateInList).to.equal(true);
         });
 
-        it('returns false when date is not a northern-irish, english or welsh bank holiday', async function() {
-            const isBankHoliday = await ukBankHolidays('21-03-2018', countries);
-            expect(isBankHoliday).to.equal(false);
+        it('should return false if date is a string but not in the list', () => {
+            isDateInList = ukBankHolidays.isDateABankHoliday('31-08-2018');
+            expect(isDateInList).to.equal(false);
         });
 
-    });
-
-    describe('northern-ireland and scotland', () => {
-
-        before(() => {
-            countries =  ['northern-ireland', 'scotland'];
+        it('should return true if date is a moment and in the list', () => {
+            isDateInList = ukBankHolidays.isDateABankHoliday(moment('25-12-2018', 'DD-MM-YYYY'));
+            expect(isDateInList).to.equal(true);
         });
 
-        it('returns true when date is a scottish bank holiday but not northern-irish', async function() {
-            const isBankHoliday = await ukBankHolidays('30-11-2018', countries);
-            expect(isBankHoliday).to.equal(true);
+        it('should return false if date is a moment but not in the list', () => {
+            isDateInList = ukBankHolidays.isDateABankHoliday(moment('31-08-2018', 'DD-MM-YYYY'));
+            expect(isDateInList).to.equal(false);
         });
 
-        it('returns true when date is a northern-irish bank holiday but not scottish', async function() {
-            const isBankHoliday = await ukBankHolidays('12-07-2018', countries);
-            expect(isBankHoliday).to.equal(true);
+        it('should throw an error if date is not correct format', () => {
+            isDateInList = () => ukBankHolidays.isDateABankHoliday('2018-12-25');
+            expect(isDateInList).to.throw(Error, 'Date is an incorrect format. Must be in DD-MM-YYYY format');
         });
 
-        it('returns false when date is not a scottish or northern-irish bank holiday', async function() {
-            const isBankHoliday = await ukBankHolidays('21-03-2018', countries);
-            expect(isBankHoliday).to.equal(false);
+        it('should throw an error if date is an empty string', () => {
+            isDateInList = () => ukBankHolidays.isDateABankHoliday('');
+            expect(isDateInList).to.throw(Error, 'Date is an incorrect format. Must be in DD-MM-YYYY format');
         });
 
-    });
-
-    describe('england-and-wales, northern-ireland and scotland', () => {
-
-        before(() => {
-            countries =  ['england-and-wales', 'northern-ireland', 'scotland'];
-        });
-
-        it('returns true when date is a scottish bank holiday but not english, welsh, northern-irish', async function() {
-            const isBankHoliday = await ukBankHolidays('30-11-2018', countries);
-            expect(isBankHoliday).to.equal(true);
-        });
-
-        it('returns true when date is a northern-irish bank holiday but not english, welsh or scottish', async function() {
-            const isBankHoliday = await ukBankHolidays('12-07-2018', countries);
-            expect(isBankHoliday).to.equal(true);
-        });
-
-        it('returns true when date is an english, welsh and northern-irish bank holiday but not scottish', async function() {
-            const isBankHoliday = await ukBankHolidays('27-08-2018', countries);
-            expect(isBankHoliday).to.equal(true);
-        });
-
-        it('returns false when date is not an english, welsh, scottish or northern-irish bank holiday', async function() {
-            const isBankHoliday = await ukBankHolidays('21-03-2018', countries);
-            expect(isBankHoliday).to.equal(false);
-        });
-
-    });
-
-    describe('date as a string', () => {
-
-        before(() => {
-            countries =  ['england-and-wales', 'northern-ireland', 'scotland'];
-        });
-
-        it('should return true when date is as a string and a bank holiday', async function() {
-            const isBankHoliday = await ukBankHolidays('25-12-2018', countries);
-            expect(isBankHoliday).to.equal(true);
-        });
-
-        it('should return false when date is as a string and not a bank holiday', async function() {
-            const isBankHoliday = await ukBankHolidays('21-03-2018', countries);
-            expect(isBankHoliday).to.equal(false);
-        });
-
-    });
-
-    describe('date as a moment', () => {
-
-        before(() => {
-            countries =  ['england-and-wales', 'northern-ireland', 'scotland'];
-        });
-
-        it('should return true when date is as a moment and a bank holiday', async function() {
-            const isBankHoliday = await ukBankHolidays(moment('25-12-2018', 'DD-MM-YYYY'), countries);
-            expect(isBankHoliday).to.equal(true);
-        });
-
-        it('should return true when date is as a moment in a different format and a bank holiday', async function() {
-            const isBankHoliday = await ukBankHolidays(moment('2018-12-25', 'YYYY-MM-DD'), countries);
-            expect(isBankHoliday).to.equal(true);
-        });
-
-        it('should return false when date is as a moment and not a bank holiday', async function() {
-            const isBankHoliday = await ukBankHolidays(moment('21-03-2018', 'DD-MM-YYYY'), countries);
-            expect(isBankHoliday).to.equal(false);
-        });
-
-        it('should return false when date is as moment in a different format and not a bank holiday', async function() {
-            const isBankHoliday = await ukBankHolidays(moment('2018-03-21', 'YYYY-MM-DD'), countries);
-            expect(isBankHoliday).to.equal(false);
-        });
-
-    });
-
-    describe('errors', () => {
-
-        it('should throw an error if no arguments passed', async function() {
-            await ukBankHolidays().should.be.rejectedWith('No arguments passed');
-        });
-
-        it('should throw an error if countries not passed', async function() {
-            await ukBankHolidays('24-12-2018').should.be.rejectedWith('Countries not passed');
-        });
-
-        it('should throw an error if invalid country passed', async function() {
-            await ukBankHolidays('24-12-2018', ['invalidCountry']).should.be.rejectedWith('Country not on the list');
-        });
-
-        it('should throw an error if countries is not an array', async function() {
-            await ukBankHolidays('24-12-2018', 'england-and-wales').should.be.rejectedWith('Countries must be an array');
-        });
-
-        it('should throw an error if date is an empty string', async function() {
-            await ukBankHolidays('', 'england-and-wales').should.be.rejectedWith('Date is an incorrect format. Must be in DD-MM-YYYY format');
-        });
-
-        it('should throw an error if date is not correct format', async function() {
-            await ukBankHolidays('24-12-18', 'england-and-wales').should.be.rejectedWith('Date is an incorrect format. Must be in DD-MM-YYYY format');
-        });
-
-        it('should throw an error if moment date is not valid', async function() {
-            await ukBankHolidays(moment('30-02-2018', 'DD-MM-YYYY'), 'england-and-wales').should.be.rejectedWith('Date passed is an invalid date');
-        });
-
-        it('should throw an error if string date is not valid', async function() {
-            await ukBankHolidays('30-02-2018', 'england-and-wales').should.be.rejectedWith('Date passed is an invalid date');
+        it('should throw an error if date is not valid', () => {
+            isDateInList = () => ukBankHolidays.isDateABankHoliday('30-02-2018');
+            expect(isDateInList).to.throw(Error, 'Date passed is an invalid date');
         });
 
     });
