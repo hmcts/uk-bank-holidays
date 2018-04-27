@@ -1,7 +1,10 @@
 {
-  "name": "uk-bank-holidays",
+  "name": "@hmcts/uk-bank-holidays",
   "description": "Check if a date is a bank holiday",
   "version": "0.0.1",
+  "engines": {
+    "node": ">=8.1.4"
+  },
   "scripts": {
     "coverage": "nyc report --reporter=text-lcov > coverage.lcov && codecov",
     "test": "cross-env NODE_PATH=. nyc --reporter=text-summary mocha 'test/unit/**/*.test.js'"
