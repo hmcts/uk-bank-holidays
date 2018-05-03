@@ -14,18 +14,13 @@ Then, require the module in your code:
 ```javascript
 const UkBankHolidays = require('@hmcts/uk-bank-holidays');
 
-
-// instantiate the class and pass the countries you want the bank holiday dates for.
+// Instantiate the class and pass the countries you care about.
 const ukbankholidays = new UkBankHolidays(['england-and-wales']);
 
+// Make an API call to load and cache the Bank Holidays dates, these dates are based on the countries. 
+const bankHolidays = await ukbankholidays.load();
 
-// call this async function and pass an error callback. This gets the dates of bank holidays and caches it.
-await ukbankholidays.loadBankHolidayDates(error => {
-    // handle the error
-});
-
-
-// Then call this function and pass the date that you want to check. It return a boolean depending on whether it's a bank holiday or not
+// Now pass a date (DD-MM-YYYY) to the isDateABankHoliday() function which returns a boolean.
 const isDateABankHoliday = ukbankholidays.isDateABankHoliday('25-12-2018'); // returns true;
 ```
 
