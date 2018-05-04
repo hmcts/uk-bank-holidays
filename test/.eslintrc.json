@@ -1,0 +1,25 @@
+{
+  "env": {
+    "es6": true,
+    "node": true,
+    "mocha": true
+  },
+  "extends": "@hmcts/eslint-config/test",
+  "parserOptions": {
+    "sourceType": "module",
+    "ecmaVersion": 2017
+  },
+  "rules": {
+    "object-curly-newline": ["error", {
+      "consistent": true
+    }],
+    "max-len": ["error", {
+      "code": 120
+      }
+    ],
+    "space-before-function-paren": ["error", {
+      "asyncArrow": "always"
+      }
+    ]
+  }
+}
