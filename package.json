@@ -2,7 +2,7 @@
   "name": "@hmcts/uk-bank-holidays",
   "description": "Check if a date is a bank holiday",
   "homepage": "https://github.com/hmcts/uk-bank-holidays#readme",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "engines": {
     "node": ">=8.1.4"
   },
