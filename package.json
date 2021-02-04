@@ -23,7 +23,7 @@
     "lodash": "^4.17.5",
     "moment": "^2.21.0",
     "node-cache": "^4.2.0",
-    "superagent": "^3.8.2"
+    "superagent": "^3.8.3"
   },
   "devDependencies": {
     "@hmcts/eslint-config": "^1.4.0",
